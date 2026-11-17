@@ -1,0 +1,12 @@
+name: Validate submission package
+on: [push, pull_request]
+jobs:
+  package:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate bundled resources and build text staging payload
+        run: python submission/build_package.py > "$RUNNER_TEMP/agensi-staging.json"

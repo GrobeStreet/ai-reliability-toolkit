@@ -53,3 +53,10 @@ separately; installing this skill does not install or validate that package.
 
 Bobby Morong (RCV Labs). MIT. AI assistance in authoring is not independent
 review, and use of this method does not establish production readiness.
+
+## Marketplace preparation
+
+A single-skill Agensi submission draft, included-file manifest, and offline
+packaging check are under [submission/](submission/agensi-listing.md).
+The skill includes a paired-results example and report template. Preparation
+does not mean the listing is submitted, approved, or tested through Agensi.

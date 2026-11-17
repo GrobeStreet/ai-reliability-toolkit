@@ -100,3 +100,7 @@ limits; decision against predeclared thresholds; and the smallest next action.
 If no new run was possible, label the output **audit plan — not a completed
 measurement** and show each proposed measurement as **not measured**. Keep
 clearly labeled descriptive calculations from supplied records separate.
+
+For a compact deliverable, use [the report template](templates/report.md).
+For a synthetic supplied-data comparison that separates accuracy drift from
+correctness changes, see [the paired example](references/paired-example.md).

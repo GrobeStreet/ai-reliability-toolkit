@@ -1,0 +1,27 @@
+{
+  "format": "text-file-staging-manifest-v1",
+  "skill_name": "ai-reliability-audit",
+  "package_version": "0.2.1",
+  "files": [
+    {
+      "source": "skills/ai-reliability-audit/SKILL.md",
+      "path": "SKILL.md"
+    },
+    {
+      "source": "skills/ai-reliability-audit/references/metrics.md",
+      "path": "references/metrics.md"
+    },
+    {
+      "source": "skills/ai-reliability-audit/references/paired-example.md",
+      "path": "references/paired-example.md"
+    },
+    {
+      "source": "skills/ai-reliability-audit/templates/report.md",
+      "path": "templates/report.md"
+    },
+    {
+      "source": "LICENSE",
+      "path": "LICENSE"
+    }
+  ]
+}
