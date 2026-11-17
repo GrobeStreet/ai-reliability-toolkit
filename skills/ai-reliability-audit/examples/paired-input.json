@@ -1,0 +1,53 @@
+{
+  "rows": [
+    {
+      "item_id": "q1",
+      "condition": "original",
+      "correct": true
+    },
+    {
+      "item_id": "q2",
+      "condition": "original",
+      "correct": false
+    },
+    {
+      "item_id": "q3",
+      "condition": "original",
+      "correct": true
+    },
+    {
+      "item_id": "q4",
+      "condition": "original",
+      "correct": false
+    },
+    {
+      "item_id": "q1",
+      "condition": "rotated",
+      "correct": false
+    },
+    {
+      "item_id": "q2",
+      "condition": "rotated",
+      "correct": true
+    },
+    {
+      "item_id": "q3",
+      "condition": "rotated",
+      "correct": true
+    },
+    {
+      "item_id": "q4",
+      "condition": "rotated",
+      "correct": false
+    }
+  ],
+  "expected_metrics": {
+    "n_items": 4,
+    "per_condition_accuracy": {
+      "original": 0.5,
+      "rotated": 0.5
+    },
+    "max_drift": 0.0,
+    "correctness_flip_rate": 0.5
+  }
+}
