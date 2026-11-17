@@ -1,86 +1,134 @@
-# Reliability metrics — formulas, worked examples, and gotchas
+# Reliability metrics and design limits
 
-Reference for the AI Reliability Audit skill. Use these to attach honest uncertainty to every reliability claim.
+Use these notes to choose an analysis. They do not make an unsupported
+sampling model valid. Separate observed facts from statistical inference.
 
-## 1. Confidence interval for a rate (accuracy, robustness, agreement)
+## 1. Estimand, unit, and provenance
 
-A rate from N trials (k successes, p̂ = k/N) is an estimate, not the truth. Always report an interval.
+For a fixed set of deterministic benchmark outputs, the observed accuracy is
+an exact summary of that set. An interval for a broader population requires a
+sampling model. A stochastic-run claim requires repeated runs and a defined
+run-generating process.
 
-### Wilson score interval (preferred for proportions)
-More accurate than the normal ("Wald") interval, especially for small N or p̂ near 0 or 1 — the regime reliability claims live in.
+Declare the independent unit. Several rotations of one question, several
+sessions from one person, or repeated outputs from the same item are dependent.
+Preserve item/person clusters and A/B pairing throughout analysis.
+State missing-response and parsing policies before inspecting results.
+Retain item IDs; reject duplicated or incomplete comparison cells rather than
+silently pairing rows by their order.
 
-For confidence level with z (z = 1.96 for 95%):
+## 2. Independent binary rates
 
+For N independent binary outcomes, k successes, p_hat = k/N, a Wilson score
+interval with z = 1.96 is:
+
+```text
+center = (p_hat + z*z/(2*N)) / (1 + z*z/N)
+half = z * sqrt(p_hat*(1-p_hat)/N + z*z/(4*N*N)) / (1 + z*z/N)
+interval = [center-half, center+half]
 ```
-center = (p̂ + z²/(2N)) / (1 + z²/N)
-half   = (z / (1 + z²/N)) * sqrt( p̂(1-p̂)/N + z²/(4N²) )
-CI     = [center - half, center + half]
-```
 
-Worked example: 46/50 correct → p̂ = 0.92. Wilson 95% CI ≈ **[0.808, 0.970]**. Report "92% (95% CI 81–97%, N=50)," never a bare "92%."
+N must be positive. Example: 46/50 = 92%, Wilson 95% interval approximately
+80.8–97.0%. State both the denominator and the independence/population
+assumptions. Do not count four rotations of 50 questions as 200 independent
+questions. A binomial interval does not account for label errors, biased
+sampling, grader errors, or distribution shift.
 
-Do **not** use the Wald interval (p̂ ± z·sqrt(p̂(1-p̂)/N)) for small N or extreme p̂ — it gives impossible bounds (>1 or <0) and overstates precision.
+For dependent observations, choose a design-aware method, such as resampling
+whole original items. If there are few clusters, acknowledge that nominal
+coverage may be poor. No routine interval certifies reliability.
 
-### Bootstrap (for anything that isn't a simple proportion)
-For F1, RMSE, AUC, mean scores, or any statistic: resample the N cases with replacement B times (B ≥ 2000), recompute the statistic each time, and take the 2.5th and 97.5th percentiles as the 95% CI. Seed the resampler and report the seed.
+## 3. Comparisons and bootstrap
 
-## 2. Comparing two systems / claims
+For two systems tested on the same items, estimate the paired difference.
+Report the effect, its interval, and a design-appropriate comparison, such as
+McNemar's test for paired binary outcomes when its conditions fit.
+Overlap of two marginal confidence intervals is not a paired test.
 
-A higher point estimate is not a real difference. To call B better than A:
+A paired item bootstrap samples original item IDs with replacement and carries
+all systems/conditions/repeats for each sampled ID together. Recompute the
+statistic per resample. For clustered people or sessions, resample the actual
+independent cluster instead. Use stratification or a different method when
+the design requires it.
 
-- For paired data (same cases through both), use **McNemar's test** on the discordant pairs, or a paired bootstrap of the difference. Report the CI of the *difference*; if it crosses 0, the difference is not established at that N.
-- State the **minimum detectable effect (MDE)**: with N cases, you can reliably detect roughly an accuracy gap of ≈ 2·z·sqrt(p̂(1-p̂)/N). If the claimed improvement is smaller than the MDE, the test set is too small to support it — a finding, not a pass.
+Report the method, number of resamples (normally at least 2,000), seed, target,
+and assumptions. Percentile bootstrap is not automatically appropriate for
+every metric. A max-over-conditions statistic, boundary estimate, small sample,
+selection procedure, or dependent series may require a different treatment.
+More resamples reduce Monte Carlo error, not design bias.
 
-## 3. Minimum N (why small samples lie)
+A point estimate below a tolerance is not evidence of equivalence. Establish
+equivalence only with a prespecified tolerance and valid design/uncertainty
+procedure. Otherwise report a descriptive threshold comparison.
 
-Rough N needed to estimate a ~90% accuracy to a given ±half-width (95% Wilson, p≈0.9):
+## 4. Precision and power planning
 
-| Target ± half-width | Approx N needed |
-|---|---|
-| ±10 pts | ~35 |
-| ±5 pts  | ~140 |
-| ±3 pts  | ~385 |
-| ±2 pts  | ~865 |
-| ±1 pt   | ~3,460 |
+Do not claim an MDE from a formula using only N and a single accuracy estimate.
+Power planning requires a design, significance level, desired power, target
+effect, and relevant variance parameters. Paired binary designs additionally
+depend on discordant pairs.
 
-Implication: a "95% accurate" claim from 20 examples has a CI roughly [76%, 99%] — it cannot distinguish "excellent" from "mediocre." Flag any headline number whose N can't support the precision implied.
+For estimation, specify the desired interval width and use a validated
+design-specific calculation or simulation. Distinguish a rough planning
+approximation from an achieved precision guarantee. If the required inputs
+or implementation are absent, label power/MDE **not calculated**.
 
-## 4. Robustness
+## 5. Robustness and repeat consistency
 
-- **Perturbation taxonomy** (meaning-preserving — the answer *should not* change):
-  - lexical: case change, whitespace add/trim, punctuation, unicode look-alikes
-  - surface: paraphrase, synonym swap, reformat (JSON ↔ prose ↔ markdown)
-  - structural: reorder multiple-choice options, reorder independent list items, shuffle few-shot example order
-  - distractor: add irrelevant but plausible context
-- **Robustness rate** = fraction of cases whose verdict is unchanged across the perturbation set; attach a Wilson CI.
-- The **option-order shuffle** is the single highest-yield probe for multiple-choice/classification: a large accuracy drop when only the order changes means the model is keying on position, so the headline accuracy is partly an artifact.
+Check that every transformation preserves the intended answer. Reordering
+options with references such as "all of the above" may change the task.
+Whitespace changes can alter code or structured inputs. Paraphrases need
+semantic checks. Limit conclusions to the tested transformations.
 
-## 5. Consistency (run-to-run)
+Define metrics explicitly:
+- **Answer flip rate:** fraction of original items whose canonical predicted
+  answer changes at least once across the declared conditions.
+- **Correctness flip rate:** fraction whose correct/incorrect status changes
+  at least once. Wrong-to-wrong answer changes are invisible here.
+- **Accuracy drift:** maximum minus minimum condition-level accuracy.
 
-- Hold inputs fixed; vary only seed/sampling. Run R times (R ≥ 5).
-- **Flip rate** = fraction of cases whose verdict is not identical across all R runs. Report it with a CI.
-- A non-trivial flip rate means the reported accuracy is itself a random variable; average accuracy can look fine while individual decisions are unstable — a real defect for anything user-facing.
+A model may have zero accuracy drift and 100% correctness flips.
+Boolean correctness data cannot recover underlying-answer flips.
+Resample whole items for sampling-based uncertainty; keep any repeat budget
+and stochastic-run variability distinct from question-sampling variability.
+Do not infer memorization or contamination from order sensitivity alone.
 
-## 6. Calibration
+## 6. Calibration requires observed outcomes
 
-Does confidence match correctness?
+Match probabilities to a clearly defined event and observed labels.
+Without labels, report confidence distributions or stability, not empirical
+calibration. Consistency is not correctness.
 
-- **Brier score** = mean( (p_pred − outcome)² ) over cases, where p_pred is the model's stated probability and outcome ∈ {0,1}. Lower is better; 0.25 is the "always say 50%" baseline.
-- **Expected Calibration Error (ECE)**: bin predictions by stated confidence (e.g. 10 bins), and within each bin compute |mean(confidence) − accuracy|; ECE is the sample-weighted average of those gaps.
-- **Overconfidence signature**: high mean confidence, lower accuracy, ECE concentrated in the high-confidence bins. This is the failure that erodes user trust fastest — always call it out explicitly, not just as a number.
-- A **reliability diagram** (stated confidence on x, observed accuracy on y, with the y=x diagonal) makes miscalibration visible at a glance.
+For a binary event, Brier score is mean((p-y)^2), y in {0,1}. A constant
+0.5 forecast has score 0.25 for this binary definition. Also compare an
+appropriate prevalence-based baseline. For multiclass probabilities,
+state the chosen normalization; the common summed squared error is not
+the same metric as binary correctness-confidence scoring.
 
-## 7. Reproducibility ledger (for claims/papers/benchmarks)
+Brier score and log loss reflect more than calibration, so interpret them
+with reliability diagnostics rather than calling either a pure calibration
+score. A reliability diagram compares mean probability with observed event
+frequency in bins. State bin definitions, counts, and uncertainty assumptions.
 
-Record, so the result is checkable by a third party:
+ECE is a binned, sample-weighted average of absolute confidence/outcome gaps.
+State bin edges, weighting, and whether it is top-label or classwise. ECE can
+change with the binning and sample size; examine sensitivity before making a
+strong claim. Sparse bins and label noise limit conclusions.
 
-- data: exact file/version/hash; code: commit/pin; seed(s); environment (library versions, thread count).
-- Pin determinism where possible (e.g. single-threaded BLAS) so two runs are bit-identical; verify by hashing the output and report the hash.
-- Document every deviation from the original method, and never tune the reproduction to force a match with the published number — report the honest gap and its likely cause.
+## 7. Reproducibility and readiness
 
-## 8. Honesty rules (non-negotiable)
+Record data/model revisions, input/output hashes, code commit, command,
+environment, precision/device, seeds, decoding settings, and exceptions.
+Distinguish:
+- exact artifact verification;
+- reruns within declared numeric tolerances;
+- repeated stochastic results under a specified distribution/comparison rule;
+- external independent replication.
 
-- Every rate ships with its N and interval.
-- A difference inside the noise is reported as "not established at this N," not as an improvement.
-- "Demo passed" ≠ "production ready." Say which was tested.
-- Absence of ground truth limits the audit to consistency/calibration — state it; do not imply accuracy was measured when it wasn't.
+Seeds alone do not ensure bit-identical GPU or hosted-model results. A
+historical artifact cannot retroactively gain execution provenance from later
+version pins.
+
+Tie readiness to the use case's prespecified thresholds and failure severity.
+Missing checks remain **not measured**. A reported run is not an independently
+verified run, and source inspection is not runtime execution.
