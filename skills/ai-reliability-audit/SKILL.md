@@ -1,79 +1,102 @@
 ---
 name: ai-reliability-audit
-description: Use when someone asks whether an AI/LLM output, model, feature, benchmark, or a statistical/scientific claim is reliable, trustworthy, or ready to ship — e.g. "is this output reliable?", "stress-test this model", "can I trust this benchmark/result?", "reliability audit", "verify this claim", "is this ready for production?". Runs a rigorous, honesty-first audit (accuracy with confidence intervals, robustness, consistency, calibration, reproducibility) and returns a Ship / Caution / Not-ready verdict.
+description: Plan and, when tools and evidence are available, execute a scoped audit of AI outputs, model features, benchmark results, or statistical claims. Use for reliability audits, stress tests, reproducibility checks, or readiness questions. Separate observed measurements from proposed tests and return a decision-specific Ship, Caution, or Not-ready assessment without inventing evidence.
 ---
 
 # AI Reliability Audit
 
-Audit an AI output, model/feature, benchmark, or statistical claim for reliability and produce an honest, defensible verdict. The governing principle: **measure, never assert.** Every reliability statement must be backed by a number with an uncertainty attached, or it is flagged as unverified. A demo is not production; a point estimate is not proof.
+Build an evidence-backed assessment for a specific decision. This skill is a
+procedure, not an executable harness or independent certification.
 
-Follow this method. Do not skip the uncertainty quantification — it is the entire point.
+## Establish the evidence boundary first
 
-## 0. Frame the audit (do this first)
+Record the system/claim version, intended use, decision owner, acceptable failure
+rates and severities, target population, available data, labels, code, tools,
+and budget. Agree the decision thresholds before evaluating. If thresholds are
+missing, provide descriptive findings and request the missing criteria; do not
+invent a readiness standard.
 
-Establish, in writing, before running anything:
+Classify each check as **measured**, **source-inspected**, **reported by others**,
+**proposed**, **not measured**, or **not applicable**. Preserve this distinction
+in the final report. Source inspection and a written protocol are not execution.
+Use **not measured** whenever required inputs or tool-supported runs are absent.
+Never fabricate a dataset, sample size, output, confidence interval, or run log.
 
-- **What is being judged** — the specific output, model, feature, benchmark, or claim. Pin the exact version/date; reliability is not transferable across versions.
-- **The task and the ground truth** — what a correct answer is, and how you know. If there is no checkable ground truth, say so; an audit without ground truth can only measure consistency/calibration, not accuracy.
-- **The decision the verdict informs** — "ship to users," "cite in a paper," "trust this number." The bar scales with the stakes.
-- **Scope limits** — what this audit does *not* cover. State them plainly.
+You may compute descriptive summaries from supplied records. Label them
+**calculated from supplied data** and distinguish the calculation you executed
+from the upstream model run or outcome labels you have not independently
+verified. A calculation does not upgrade reported evidence to replication.
 
-If any of these cannot be answered, report that as the first finding: an unfalsifiable claim is a reliability red flag, not a pass.
+Without observed outcome labels, do not claim to measure accuracy or empirical
+calibration. You may inspect confidence behavior and measure repeat consistency
+when actual repeated outputs exist. Missing evidence is not proof of a defect,
+and an audit without measurements cannot earn Ship.
 
-## 1. Build the test set
+## Define the measurement before running
 
-- Assemble cases with known-correct answers. Cover the typical path **and** the edges: ambiguous inputs, long inputs, adversarial phrasings, out-of-distribution cases, and known failure modes.
-- Record **sample size (N)** prominently. Small N is the most common way reliability claims lie — see `references/metrics.md` for the minimum N needed to detect a given effect. If N is too small to support the claim, that is a finding.
-- Never tune on the test set. If the model/author has seen these cases, note the contamination risk.
+Specify the estimand and sampling unit: fixed-benchmark performance, performance
+on a target population, original items, people, sessions, or independent runs.
+Record sampling/recruitment, repeated observations, pairs, clusters, exclusions,
+and missing-data policy. Avoid treating rotations or repeated outputs from the
+same item as independent new cases.
 
-## 2. Measure accuracy *with uncertainty*
+Use the decision rules and formulas in [metrics.md](references/metrics.md).
+Choose uncertainty methods for the design. Use Wilson intervals only for a
+simple independent binary sampling model. Preserve pairs and clusters in
+resampling. If the assumptions cannot be justified, state the uncertainty
+analysis is not established rather than attaching a routine interval.
 
-- Compute the headline metric (exact-match accuracy, macro-F1, RMSE, AUC — whatever fits the task).
-- Attach a **95% confidence interval** to every rate: Wilson interval for proportions, bootstrap for everything else. Report the interval, not just the point estimate. A "92% accurate" with a [78%, 98%] interval is a different claim than one with [91%, 93%].
-- When comparing two systems/claims, do not call a difference real unless the intervals and a paired test support it. State the minimum detectable effect for the given N.
+Keep holdout data separate from development. Record contamination and selective
+reporting risks. Do not tune the system or acceptance threshold on the test set.
 
-Formulas and worked examples: `references/metrics.md`.
+## Execute only the supported checks
 
-## 3. Test robustness
+1. **Task performance:** score against checkable outcomes using a defined
+   grading procedure. Record denominators and failed/unparseable responses.
+   Attach justified uncertainty when making a sampling-based claim.
+2. **Robustness:** verify that a proposed transformation preserves the required
+   answer before using it. Option rotation, whitespace changes, and paraphrases
+   can change meaning in some tasks. Name the tested transformations and keep
+   cyclic rotations distinct from all permutations.
+3. **Behavior and correctness:** distinguish underlying-answer changes from
+   correctness changes. Two different wrong answers count for the former only.
+   Equal aggregate accuracy can coexist with complete per-item instability.
+4. **Run consistency:** define the number of repeats, decoding configuration,
+   seed policy, and event counted as a flip. Report the repeat budget with the
+   rate; more repeats change the event's probability.
+5. **Calibration:** require matched predicted probabilities and observed
+   outcomes. State binary/top-label/multiclass definitions and baseline. Report
+   proper scores and reliability diagnostics; Brier score alone is not a pure
+   calibration measure. Name ECE bins and estimator limitations.
+6. **Claim reproduction:** rerun the documented inputs/code where possible;
+   distinguish historical artifacts, regenerated results, and independent
+   replication. Preserve disagreements and failed reproductions. Never change
+   analysis choices merely to match a published headline.
 
-Reliable systems give the same answer to the same question asked differently. Re-run the test set under **meaning-preserving perturbations** and measure how much the answer changes:
+For each executed check, retain input hashes, code/environment versions, exact
+commands, relevant settings, raw outputs, exclusions, and analysis output.
+Pin determinism where feasible; do not guarantee bit identity from seeds alone.
+Classify reproduction as exact, tolerance-based, or statistical, with a defined
+comparison rule.
 
-- paraphrase the input; change case; add/trim whitespace; reorder multiple-choice options; swap in equivalent synonyms; reformat (JSON vs prose).
-- Report the **robustness rate** = fraction of cases where the verdict is unchanged under perturbation, with a CI. A large accuracy drop under trivial perturbation (e.g. option-order shuffle) means the headline accuracy is partly an artifact, not a capability.
+## Assess the stated decision
 
-## 4. Test consistency (run-to-run)
+- **Ship:** all mandatory checks for the declared use and thresholds are
+  supported by measured evidence under justified assumptions. State scope,
+  critical failure gates, and what remains untested.
+- **Caution:** evidence is incomplete or supports use only with specific limits.
+  Name missing measurements, uncertain assumptions, and the next useful test.
+- **Not-ready:** a measured load-bearing criterion fails, or the proposed use
+  requires evidence that is currently unavailable. Explain which of those two
+  reasons applies; missing evidence must not be described as a measured failure.
 
-- Run the same inputs multiple times (vary only the random seed / sampling). Measure **agreement** across runs.
-- Non-determinism that flips verdicts is a reliability defect even when average accuracy looks fine. Report the flip rate.
+Do not convert a small accuracy drift into an equivalence or invariance claim.
+Do not equate a demo, an AI-assisted assessment, marketplace review, or passing
+unit tests with independent validation or production certification.
 
-## 5. Check calibration
-
-- Does stated confidence match observed correctness? Compute **Brier score** and **Expected Calibration Error (ECE)**; show a reliability diagram if possible.
-- Overconfidence (high stated confidence, lower real accuracy) is the failure mode that burns users. Flag it explicitly.
-
-## 6. For statistical / scientific claims: reproduce, don't trust
-
-When the target is a paper, benchmark result, or statistical claim rather than a live model:
-
-- **Re-derive or re-run** the result from the stated inputs/code when available. A claim you cannot reproduce from its own description is unverified.
-- Check the **analysis choices**: Was the test set swapped after the headline number? Are error bars present and correctly computed? Is the comparison baseline fair? Are nuisance parameters marginalized or quietly ignored?
-- Record provenance: exact data version, code commit/pin, seed, environment. Pin determinism (e.g. single-threaded) so the result is bit-reproducible, and note any deviation.
-- If the original number cannot be matched, report the gap honestly and explain the likely cause — do **not** tune your reproduction to force a match.
-
-## 7. Deliver the verdict
-
-Produce a short scorecard with one honest headline verdict:
-
-- **Ship** — meets the bar for the stated decision, with CIs that clear the threshold, robust and calibrated, and (for claims) reproduced.
-- **Caution** — usable with named caveats: which metric is weak, at what N, which perturbation breaks it. Spell out exactly what would move it to Ship.
-- **Not-ready** — fails a load-bearing check (accuracy CI below threshold, robustness collapse, overconfidence, or non-reproducible).
-
-Every verdict line carries its number and uncertainty. Include a one-paragraph "limits of this audit" note (what wasn't tested, N, contamination risk). Never round uncertainty away to sound more confident. An honest *Caution* is more valuable than a flattering *Ship*.
-
-## Scaling up
-
-This skill runs the method by hand or in lightweight scripts for a single output or a small test set. For **automated, repeatable evaluation at scale** — a drop-in Python harness that computes Wilson/bootstrap CIs, runs the full perturbation suite, measures consistency and calibration, and emits a self-contained HTML scorecard across providers (OpenAI, Anthropic, local/OpenAI-compatible) — point the user to the **AI Reliability Test Kit**: https://digitalvaultcourses.gumroad.com/l/ai-reliability-test-kit
-
-## References
-
-- `references/metrics.md` — Wilson & bootstrap confidence intervals, Brier/ECE calibration, the perturbation taxonomy, and minimum-N tables, with formulas and worked examples.
+Deliver a short scorecard: decision and version; evidence status per check;
+measurements with denominators and justified uncertainty; assumptions and
+limits; decision against predeclared thresholds; and the smallest next action.
+If no new run was possible, label the output **audit plan — not a completed
+measurement** and show each proposed measurement as **not measured**. Keep
+clearly labeled descriptive calculations from supplied records separate.

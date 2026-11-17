@@ -1,11 +1,11 @@
 {
   "name": "ai-reliability-toolkit",
-  "version": "0.1.0",
-  "description": "Pressure-test AI/LLM outputs and statistical or scientific claims for reliability: accuracy with honest confidence intervals, robustness to perturbations, run-to-run consistency, calibration, and reproducibility — ending in a Ship / Caution / Not-ready verdict.",
+  "version": "0.2.0",
+  "description": "Plan and execute evidence-bounded AI reliability audits when data and tools are available. Distinguish measured results, reported claims and missing evidence; assess a specific decision against declared thresholds.",
   "author": {
     "name": "Bobby Morong (RCV Labs)"
   },
-  "homepage": "https://digitalvaultcourses.gumroad.com/l/ai-reliability-test-kit",
+  "homepage": "https://github.com/GrobeStreet/ai-reliability-toolkit",
   "license": "MIT",
   "keywords": [
     "ai",
