@@ -8,6 +8,9 @@ import sys
 
 def build(root):
     manifest = json.loads((root / "submission/package-manifest.json").read_text())
+    plugin = json.loads((root / ".claude-plugin/plugin.json").read_text())
+    if manifest["package_version"] != plugin["version"]:
+        raise ValueError("manifest and plugin versions must match")
     files, destinations = [], set()
     for entry in manifest["files"]:
         source, destination = entry["source"], entry["path"]

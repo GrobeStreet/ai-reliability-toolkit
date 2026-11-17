@@ -1,0 +1,60 @@
+{
+  "schema_version": "1",
+  "tool_version": "0.3.0",
+  "evidence_status": "calculated from supplied data",
+  "metrics": {
+    "n_items": 2,
+    "per_condition_accuracy": {
+      "original": 0.5,
+      "rotated": 0.5
+    },
+    "max_drift": 0.0,
+    "correctness_flip_rate": 1.0
+  },
+  "counts": {
+    "original_items": 2,
+    "condition_cells": 4,
+    "items_with_correctness_changes": 2
+  },
+  "changed_item_ids": [
+    "q1",
+    "q2"
+  ],
+  "reproduction": {
+    "status": "matches_supplied_expectations",
+    "scope": "supplied-result arithmetic only",
+    "upstream_model_run": "not independently reproduced",
+    "checks": {
+      "n_items": true,
+      "accuracy:original": true,
+      "accuracy:rotated": true,
+      "max_drift": true,
+      "correctness_flip_rate": true
+    },
+    "absolute_tolerance": 1e-12
+  },
+  "observed_criteria": {
+    "status": "not_assessed",
+    "reason": "no predeclared criteria supplied"
+  },
+  "readiness": "not_assessed",
+  "canonical_rows_sha256": "3967cdbc7135a099abc0cb5f3d97adcabb96f4724a85dc16c62bd7246944207f",
+  "not_measured": [
+    "underlying-answer changes",
+    "calibration",
+    "transformation validity",
+    "independent upstream model execution",
+    "population uncertainty"
+  ],
+  "limitations": [
+    "Correctness changes are not underlying-answer changes.",
+    "No sampling model or uncertainty interval is inferred.",
+    "Low drift does not establish invariance, equivalence or readiness.",
+    "Expected metrics are supplied claims; a match checks arithmetic only."
+  ],
+  "execution": {
+    "input_sha256": "54af0986b53ecbafbbe953c47aebb3872e4331ff44436b598db52c3519223710",
+    "python": "3.13.3",
+    "implementation": "CPython"
+  }
+}

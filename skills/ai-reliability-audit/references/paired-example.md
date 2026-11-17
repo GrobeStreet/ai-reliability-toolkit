@@ -18,7 +18,7 @@ outputs, grading logs, population sampling design, or release criteria exist.
 
 ## Example response
 
-**Caution — descriptive comparison only.** Both conditions score 2/4 (50%),
+**Descriptive comparison only — readiness not assessed.** Both conditions score 2/4 (50%),
 so observed accuracy drift is 0 percentage points. Correctness changes on
 q1 and q2: 2/4 original items (50%). Equal accuracy therefore hides item-level
 correctness changes. These records do not establish equivalence or invariance.

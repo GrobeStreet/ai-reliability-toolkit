@@ -4,8 +4,9 @@ A Claude-oriented audit procedure for AI outputs, benchmark results, and
 statistical claims. It helps an agent define a decision, inspect the evidence,
 and execute supported measurements when data and tools are available.
 
-**This repository contains instructions and statistical reference notes, not
-an automated evaluation harness or an independent certification service.**
+**This repository contains audit instructions, statistical references and a
+small offline paired-result calculator with a reproducible toy benchmark.
+It is not a general model-evaluation harness or certification service.**
 
 ## Use
 
@@ -53,6 +54,19 @@ separately; installing this skill does not install or validate that package.
 
 Bobby Morong (RCV Labs). MIT. AI assistance in authoring is not independent
 review, and use of this method does not establish production readiness.
+
+## Offline benchmark example
+
+With Python 3.9 or newer, no installation or API key:
+
+```bash
+python3 skills/ai-reliability-audit/scripts/reproduce_demo.py | python3 skills/ai-reliability-audit/scripts/audit_benchmark.py
+```
+
+The toy scores 50% in both conditions while both items change correctness.
+The tool validates pairing and compares arithmetic with supplied expectations.
+It does not infer equivalence, population uncertainty, or production readiness.
+For full inputs and boundaries, read the skill quickstart and reproduction guide.
 
 ## Marketplace preparation
 

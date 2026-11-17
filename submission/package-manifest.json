@@ -1,7 +1,7 @@
 {
   "format": "text-file-staging-manifest-v1",
   "skill_name": "ai-reliability-audit",
-  "package_version": "0.2.1",
+  "package_version": "0.3.0",
   "files": [
     {
       "source": "skills/ai-reliability-audit/SKILL.md",
@@ -22,6 +22,34 @@
     {
       "source": "LICENSE",
       "path": "LICENSE"
+    },
+    {
+      "source": "skills/ai-reliability-audit/references/quickstart.md",
+      "path": "references/quickstart.md"
+    },
+    {
+      "source": "skills/ai-reliability-audit/references/reproduction.md",
+      "path": "references/reproduction.md"
+    },
+    {
+      "source": "skills/ai-reliability-audit/scripts/audit_benchmark.py",
+      "path": "scripts/audit_benchmark.py"
+    },
+    {
+      "source": "skills/ai-reliability-audit/scripts/reproduce_demo.py",
+      "path": "scripts/reproduce_demo.py"
+    },
+    {
+      "source": "skills/ai-reliability-audit/examples/paired-input.json",
+      "path": "examples/paired-input.json"
+    },
+    {
+      "source": "skills/ai-reliability-audit/examples/paired-output.json",
+      "path": "examples/paired-output.json"
+    },
+    {
+      "source": "skills/ai-reliability-audit/examples/toy-output.json",
+      "path": "examples/toy-output.json"
     }
   ]
 }

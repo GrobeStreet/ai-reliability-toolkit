@@ -1,7 +1,7 @@
 {
   "name": "ai-reliability-toolkit",
-  "version": "0.2.1",
-  "description": "Plan and execute evidence-bounded AI reliability audits when data and tools are available. Distinguish measured results, reported claims and missing evidence; assess a specific decision against declared thresholds.",
+  "version": "0.3.0",
+  "description": "Audit benchmark robustness and reproducibility with paired-result validation, an offline Python calculator, a reproducible toy benchmark and an evidence-bounded report.",
   "author": {
     "name": "Bobby Morong (RCV Labs)"
   },

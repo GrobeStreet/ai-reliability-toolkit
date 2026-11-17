@@ -19,7 +19,7 @@ Audit plan — not a completed measurement.
 | Reproduction | Not measured | Screenshots do not establish a reproducible run |
 | Readiness criteria | Missing | Intended users, harm severity, and tolerances unspecified |
 
-**Decision:** Caution. The claim is unverified. No accuracy estimate, interval,
+**Readiness:** Not assessed; criteria are missing. The claim is unverified. No accuracy estimate, interval,
 or calibration score can be computed from the supplied evidence. This does not
 show the bot is inaccurate; it shows that readiness has not been established.
 
